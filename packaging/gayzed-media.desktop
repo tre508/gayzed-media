@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Gayzed Media
+GenericName=Media Downloader
+Comment=Desktop media downloader and queue manager (yt-dlp)
+Keywords=Gayzer;Gayzed;Media;Downloader;yt-dlp;Video;Queue;
+Exec=gayzed-media
+Icon=gayzed-media
+Terminal=false
+Categories=AudioVideo;
+StartupNotify=true
+StartupWMClass=gayzed-media

@@ -1,0 +1,12 @@
+{
+  "output_dir": "~/Videos/latest",
+  "parallel": 3,
+  "format": "bv*+ba/b",
+  "rate_limit": "",
+  "write_thumbnail": false,
+  "write_subtitles": false,
+  "retry_count": 2,
+  "retry_backoff": 3,
+  "cookie_browser": "firefox",
+  "headers": ""
+}

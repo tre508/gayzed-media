@@ -1,0 +1,21 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments (recreate: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt)
+.venv/
+.venv-*/
+.venv*/
+
+# PyInstaller build output
+build/
+dist/
+
+# Local runtime state and debug artifacts
+.dbg/
+.tmp_*/
+*.sqlite3
+*.log
+
+# Editor / OS noise
+.DS_Store
