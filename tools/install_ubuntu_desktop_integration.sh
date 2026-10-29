@@ -38,15 +38,6 @@ desktop_src="$root_dir/packaging/gayzed-media.desktop"
 icons_src="$root_dir/assets/icons/hicolor"
 default_binary="$root_dir/dist/DesktopMediaGUI/DesktopMediaGUI"
 
-# #region debug-point B:install-computed-paths
-source "$root_dir/.dbg/menu-feature-launch.env" 2>/dev/null || true
-if [ -n "${DEBUG_SERVER_URL:-}" ]; then
-    _app_exists=0
-    if [ -f "$app_py" ]; then _app_exists=1; fi
-    curl -sX POST "$DEBUG_SERVER_URL" -H "Content-Type: application/json" -d "{\"sessionId\":\"${DEBUG_SESSION_ID:-menu-feature-launch}\",\"runId\":\"${TRAE_RUN_ID:-pre}\",\"hypothesisId\":\"B\",\"location\":\"install_ubuntu_desktop_integration.sh:35-44\",\"msg\":\"[DEBUG] Install computed paths\",\"data\":{\"root_dir\":\"$root_dir\",\"app_py\":\"$app_py\",\"app_py_exists\":$_app_exists,\"run_mode\":\"$run_mode\",\"mode\":\"$mode\",\"destdir\":\"$destdir\"}}" >/dev/null 2>&1 || true
-fi
-# #endregion
-
 if [ ! -f "$app_py" ]; then
     echo "Missing app.py at: $app_py" >&2
     exit 1
@@ -89,18 +80,6 @@ if [ "$run_mode" = "packaged" ]; then
     fi
     cat > "$wrapper" <<EOF
 #!/usr/bin/env bash
-# #region debug-point A:wrapper-launch
-wrapper_dir="\$(cd "\$(dirname "\$0")" && pwd)"
-for _dbg in "\$wrapper_dir/../.dbg/menu-feature-launch.env" "\$wrapper_dir/../../.dbg/menu-feature-launch.env"; do
-    if [ -f "\$_dbg" ]; then
-        source "\$_dbg" 2>/dev/null || true
-        break
-    fi
-done
-if [ -n "\${DEBUG_SERVER_URL:-}" ]; then
-    curl -sX POST "\$DEBUG_SERVER_URL" -H "Content-Type: application/json" -d "{\"sessionId\":\"\${DEBUG_SESSION_ID:-menu-feature-launch}\",\"runId\":\"\${TRAE_RUN_ID:-pre}\",\"hypothesisId\":\"A\",\"location\":\"install_ubuntu_desktop_integration.sh:packaged-wrapper\",\"msg\":\"[DEBUG] Wrapper invoked\",\"data\":{\"wrapper\":\"\$0\",\"binary_path\":\"$binary_path\"}}" >/dev/null 2>&1 || true
-fi
-# #endregion
 cache_dir="\${XDG_CACHE_HOME:-\$HOME/.cache}/gayzed-media"
 mkdir -p "\$cache_dir" >/dev/null 2>&1 || true
 log_file="\$cache_dir/launcher.log"
@@ -121,20 +100,6 @@ EOF
 else
     cat > "$wrapper" <<EOF
 #!/usr/bin/env bash
-# #region debug-point A:wrapper-launch
-wrapper_dir="\$(cd "\$(dirname "\$0")" && pwd)"
-for _dbg in "\$wrapper_dir/../.dbg/menu-feature-launch.env" "\$wrapper_dir/../../.dbg/menu-feature-launch.env"; do
-    if [ -f "\$_dbg" ]; then
-        source "\$_dbg" 2>/dev/null || true
-        break
-    fi
-done
-if [ -n "\${DEBUG_SERVER_URL:-}" ]; then
-    _exists=0
-    if [ -f "$app_py" ]; then _exists=1; fi
-    curl -sX POST "\$DEBUG_SERVER_URL" -H "Content-Type: application/json" -d "{\"sessionId\":\"\${DEBUG_SESSION_ID:-menu-feature-launch}\",\"runId\":\"\${TRAE_RUN_ID:-pre}\",\"hypothesisId\":\"A\",\"location\":\"install_ubuntu_desktop_integration.sh:source-wrapper\",\"msg\":\"[DEBUG] Wrapper invoked\",\"data\":{\"wrapper\":\"\$0\",\"app_py\":\"$app_py\",\"app_py_exists\":\$_exists}}" >/dev/null 2>&1 || true
-fi
-# #endregion
 app_py="$app_py"
 cache_dir="\${XDG_CACHE_HOME:-\$HOME/.cache}/gayzed-media"
 mkdir -p "\$cache_dir" >/dev/null 2>&1 || true

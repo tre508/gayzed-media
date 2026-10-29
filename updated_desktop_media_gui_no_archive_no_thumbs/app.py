@@ -726,7 +726,15 @@ class MainWindow(QMainWindow):
         self.clear_finished_btn.clicked.connect(self.clear_finished)
 
     def _apply_settings(self) -> None:
-        self.output_dir_edit.setText(self.settings.get("output_dir", DEFAULT_OUTPUT))
+        output_dir = self.settings.get("output_dir", DEFAULT_OUTPUT)
+        self.output_dir_edit.setText(output_dir)
+        # Warn if the saved output folder is not accessible (e.g. external
+        # drive not mounted) so the user knows downloads won't go there yet.
+        output_path = Path(output_dir)
+        if output_dir and output_dir != DEFAULT_OUTPUT and not output_path.exists():
+            self.log(
+                f"Saved output folder not found (drive may be unmounted): {output_dir}"
+            )
         self.parallel_spin.setValue(int(self.settings.get("parallel", 3)))
         self.format_combo.setCurrentText(self.settings.get("format", "bv*+ba/b"))
         self.rate_limit_edit.setText(self.settings.get("rate_limit", ""))
@@ -773,10 +781,14 @@ class MainWindow(QMainWindow):
         return headers
 
     def choose_output_dir(self) -> None:
+        # Open at root so mounted external drives (/media, /mnt, /run/media)
+        # are immediately visible instead of starting deep in the home folder.
+        start_dir = "/" if not self.output_dir_edit.text() else self.output_dir_edit.text()
         path = QFileDialog.getExistingDirectory(
             self,
             "Choose output folder",
-            self.output_dir_edit.text() or DEFAULT_OUTPUT,
+            start_dir,
+            QFileDialog.Option.ShowDirsOnly,
         )
         if path:
             self.output_dir_edit.setText(path)
@@ -942,34 +954,22 @@ class MainWindow(QMainWindow):
 
     def start_queue(self) -> None:
         output_dir = self.output_dir_edit.text().strip() or DEFAULT_OUTPUT
+        output_dir = str(Path(output_dir).expanduser())
         try:
             Path(output_dir).mkdir(parents=True, exist_ok=True)
         except Exception as exc:
             self.log(f"Output folder unavailable: {output_dir}\n{exc}")
-            fallback_dir = DEFAULT_OUTPUT
-            try:
-                Path(fallback_dir).mkdir(parents=True, exist_ok=True)
-            except Exception:
-                QMessageBox.warning(
-                    self,
-                    APP_NAME,
-                    "The configured output folder is unavailable.\n\n"
-                    f"{output_dir}\n\n"
-                    "Choose a writable folder and try again.",
-                )
-                self.output_dir_edit.setFocus()
-                self.output_dir_edit.selectAll()
-                return
-
-            output_dir = fallback_dir
-            self.output_dir_edit.setText(output_dir)
-            self.log(f"Falling back to default output folder: {output_dir}")
-            QMessageBox.information(
+            QMessageBox.warning(
                 self,
                 APP_NAME,
-                "The configured output folder was unavailable, so downloads will use:\n\n"
-                f"{output_dir}",
+                "The configured output folder is unavailable.\n\n"
+                f"{output_dir}\n\n"
+                "Please connect/mount the drive or choose a different folder, then try again.",
             )
+            self.output_dir_edit.setText(output_dir)
+            self.output_dir_edit.setFocus()
+            self.output_dir_edit.selectAll()
+            return
         queued = [item for item in self.items.values() if item.status == "Queued"]
         if not queued:
             QMessageBox.information(self, APP_NAME, "No queued items.")
